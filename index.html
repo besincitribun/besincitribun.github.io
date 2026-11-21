@@ -177,7 +177,7 @@ const PLAT=(()=>{ const pq=new URLSearchParams(location.search).get('plat'); con
   return {kod:'instagram',ad:'Instagram',adDa:"Instagram'da",FIIL:'TAKİP ET',Fiil:'Takip et',cta:"@besincitribun'u takip et",eden:'hesabını takip eden',sira:'takip',link:'https://www.instagram.com/besincitribun/',veri:'takipciler.json',ek:''}; })();
 // Taraftarlar: takipciler.json {guncelleme, isimler[]} (takip sırasına göre). ?demo=1 → deneme adları.
 let VERI={guncelleme:null,isimler:[]};
-const SURUM=30;
+const SURUM=31;
 try{const r=await fetch('surum.json?t='+Date.now(),{cache:'no-store'}); if(r.ok){const v=(await r.json()).surum; if(v>SURUM && url.get('v')!==String(v)){const u=new URL(location.href); u.searchParams.set('v',v); location.replace(u.toString());}}}catch(e){}
 try{const r=await fetch(PLAT.veri+'?t='+Date.now(),{cache:'no-store'}); if(r.ok) VERI=await r.json();}catch(e){}
 if(url.get('n_gercek')) VERI.isimler=VERI.isimler.slice(0,+url.get('n_gercek')); // video: belirli bir andaki tribün
@@ -817,9 +817,9 @@ const ILK11=(()=>{ const POZ=[[-47,0],[-37,-21],[-38,-7],[-38,7],[-37,21],[-26,-
   const liste=POZ.map(([x,z],i)=>KISI.ekle({forma:i?'#7a1424':'#f2c14e', kol:i?'#7a1424':'#f2c14e', pant:i?'#f4f1ea':'#16181d', ten:TEN[(i*3)%5], x, z, no:i+1, gizli:true}));
   for(const o of liste){ const c=document.createElement('canvas'); c.width=320; c.height=96; const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace;
     const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthWrite:false,toneMapped:false})); sp.scale.set(3.6,1.08,1); sp.position.set(o.x,3.0,o.z); sp.visible=false; scene.add(sp); o.sp=sp; o.cv=c; o.tex=t; }
-  function ciz(adlar){ liste.forEach((o,i)=>{ const x=o.cv.getContext('2d'), dolu=!!(adlar&&adlar[i]), ad=dolu?'@'+adlar[i]:'???'; x.clearRect(0,0,320,96);
+  function ciz(adlar){ liste.forEach((o,i)=>{ const x=o.cv.getContext('2d'), [isim,fno]=String((adlar&&adlar[i])||'').split('#'), dolu=!!isim, ad=dolu?'@'+isim:'???', no=fno||String(o.no);   // "ad#45": istenen forma numarası x.clearRect(0,0,320,96);
     x.fillStyle='rgba(14,15,18,0.88)'; x.beginPath(); x.roundRect(4,8,312,80,20); x.fill(); x.strokeStyle='#7a1424'; x.lineWidth=5; x.stroke();
-    x.textBaseline='middle'; x.textAlign='left'; x.fillStyle='#f2c14e'; x.font='900 40px system-ui'; x.fillText(String(o.no),22,50);
+    x.textBaseline='middle'; x.textAlign='left'; x.fillStyle='#f2c14e'; x.font='900 40px system-ui'; x.font=`900 ${no.length>2?30:40}px system-ui`; x.fillText(no,no.length>1?14:22,50);
     let fs=38; x.font=`800 ${fs}px system-ui`; while(x.measureText(ad).width>220&&fs>18){fs-=2; x.font=`800 ${fs}px system-ui`;}
     x.fillStyle=dolu?'#f2c14e':'#f4f1ea'; x.fillText(ad,80,50); if(dolu){ x.strokeStyle='#f2c14e'; x.lineWidth=5; x.beginPath(); x.roundRect(4,8,312,80,20); x.stroke(); } o.tex.needsUpdate=true; }); }
   function goster(v){ for(const o of liste){ o.gizli=!v; o.sp.visible=v; } }
