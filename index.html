@@ -177,7 +177,7 @@ const PLAT=(()=>{ const pq=new URLSearchParams(location.search).get('plat'); con
   return {kod:'instagram',ad:'Instagram',adDa:"Instagram'da",FIIL:'TAKİP ET',Fiil:'Takip et',cta:"@besincitribun'u takip et",eden:'hesabını takip eden',sira:'takip',link:'https://www.instagram.com/besincitribun/',veri:'takipciler.json',ek:''}; })();
 // Taraftarlar: takipciler.json {guncelleme, isimler[]} (takip sırasına göre). ?demo=1 → deneme adları.
 let VERI={guncelleme:null,isimler:[]};
-const SURUM=31;
+const SURUM=32;
 try{const r=await fetch('surum.json?t='+Date.now(),{cache:'no-store'}); if(r.ok){const v=(await r.json()).surum; if(v>SURUM && url.get('v')!==String(v)){const u=new URL(location.href); u.searchParams.set('v',v); location.replace(u.toString());}}}catch(e){}
 try{const r=await fetch(PLAT.veri+'?t='+Date.now(),{cache:'no-store'}); if(r.ok) VERI=await r.json();}catch(e){}
 if(url.get('n_gercek')) VERI.isimler=VERI.isimler.slice(0,+url.get('n_gercek')); // video: belirli bir andaki tribün
@@ -851,6 +851,31 @@ const ARAC=(()=>{ const isik=[];
   return {adim,amb,itf};
 })();
 
+/* ================== MASKOT: ışıklı demir adam (IG 6. karar, efesuna16) — saha kenarında tribünlere el sallar ================== */
+const MASKOT=(()=>{ const g=new THREE.Group(), isik=[];
+  const kutu=(p,w,h,d,x,y,z,m)=>{ const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m); o.position.set(x,y,z); p.add(o); return o; };
+  const kz=M('#b3121c'), al=M('#e0a82e'), ko=M('#2a2d33');
+  const parla=(p,w,h,d,x,y,z,renk)=>{ const m=new THREE.MeshBasicMaterial({color:renk,toneMapped:false}); kutu(p,w,h,d,x,y,z,m); isik.push(m); return m; };
+  // bacaklar, gövde, kafa
+  for(const sx of [-0.42,0.42]){ kutu(g,0.55,1.5,0.6,sx,0.75,0,kz); kutu(g,0.62,0.35,0.75,sx,0.17,0.06,al); kutu(g,0.58,0.3,0.64,sx,1.05,0,al); }
+  kutu(g,1.5,1.6,0.9,0,2.3,0,kz); kutu(g,1.2,0.35,0.8,0,1.55,0,ko); kutu(g,1.56,0.28,0.95,0,3.0,0,al);
+  const gogus=parla(g,0.46,0.46,0.06,0,2.45,0.47,'#bff4ff'); kutu(g,0.62,0.62,0.04,0,2.45,0.455,al);
+  const kafa=new THREE.Group(); kafa.position.set(0,3.55,0); g.add(kafa);
+  kutu(kafa,0.95,0.95,0.9,0,0.3,0,kz); kutu(kafa,0.75,0.62,0.06,0,0.24,0.46,al);
+  parla(kafa,0.22,0.08,0.03,-0.18,0.33,0.5,'#bff4ff'); parla(kafa,0.22,0.08,0.03,0.18,0.33,0.5,'#bff4ff');
+  // kollar: sol sabit, sağ el sallar
+  const kol=(sx)=>{ const o=new THREE.Group(); o.position.set(sx*0.98,2.95,0); g.add(o); kutu(o,0.44,0.5,0.5,0,-0.15,0,al); kutu(o,0.4,1.25,0.45,0,-0.95,0,kz);
+    parla(o,0.3,0.06,0.3,0,-1.62,0,'#bff4ff'); return o; };
+  const solK=kol(-1), sagK=kol(1); solK.rotation.z=-0.12;
+  g.scale.setScalar(1.15); g.position.set(-10,0,PW/2+1.6); g.rotation.y=Math.PI; g.visible=false; scene.add(g);
+  const sonuk=new THREE.Color('#5fa8bd'), acik=new THREE.Color('#e6fcff');
+  function adim(t){ if(!g.visible) return; const s=t/1000;
+    sagK.rotation.z=2.5+0.45*Math.sin(s*5.2); sagK.rotation.x=0.12*Math.sin(s*2.6);
+    kafa.rotation.y=0.35*Math.sin(s*0.9); g.position.y=Math.abs(Math.sin(s*2.6))*0.08;
+    const n=0.5+0.5*Math.sin(s*3); for(const m of isik) m.color.copy(sonuk).lerp(acik,n); gogus.color.copy(acik).lerp(sonuk,1-n*0.6); }
+  return {g,adim,goster:v=>{g.visible=!!v;}};
+})();
+
 /* ================== ÇİM SULAMA: 8 dönen fıskiye, kavisli su jetleri, ıslanan çim ==================
    Döngü: ~40 sn sulama, ~20 sn kapalı; başlıklar yerden çıkar/iner, ıslaklık yavaşça kurur. */
 const SULAMA=(()=>{ const NOK=[], NP=150, R=15, YUK=2.4, ACIK=40, KAPALI=20;
@@ -1299,7 +1324,7 @@ const EKRAN=(()=>{ const W=1024,H=416, cv=document.createElement('canvas'); cv.w
         let fs=130; x.font=`900 ${fs}px system-ui`; while(x.measureText(tk).width>gen&&fs>40){fs-=4; x.font=`900 ${fs}px system-ui`;}
         if(ar){ x.save(); x.beginPath(); x.arc(185,208,158,0,7); x.clip(); x.drawImage(ARMA_IMG,185-181,208-181,362,362); x.restore(); }
         const ortX=(t,y,f,c)=>{x.font=f; x.fillStyle=c; x.textAlign='center'; x.textBaseline='middle'; x.fillText(t,cx,y);};
-        { const sa=(KARAR.stadAdi||'').toLocaleUpperCase('tr-TR'); let f2=42; x.font=`800 ${f2}px system-ui`; while(x.measureText(sa).width>gen&&f2>22){f2-=2; x.font=`800 ${f2}px system-ui`;} ortX(sa,84,`800 ${f2}px system-ui`,ALT); } ortX(tk,194,`900 ${fs}px system-ui`,'#ffffff'); ortX('SIRADAKİ KARAR: '+(KARAR.siradaki||'ARMA'),318,'800 42px system-ui',KREM); }
+        { const sa=(KARAR.stadAdi||'').toLocaleUpperCase('tr-TR'); let f2=42; x.font=`800 ${f2}px system-ui`; while(x.measureText(sa).width>gen&&f2>22){f2-=2; x.font=`800 ${f2}px system-ui`;} ortX(sa,84,`800 ${f2}px system-ui`,ALT); } ortX(tk,194,`900 ${fs}px system-ui`,'#ffffff'); { const sk='SIRADAKİ KARAR: '+(KARAR.siradaki||'ARMA'); let f3=42; x.font=`800 ${f3}px system-ui`; while(x.measureText(sk).width>gen&&f3>22){f3-=2; x.font=`800 ${f3}px system-ui`;} ortX(sk,318,`800 ${f3}px system-ui`,KREM); } }
       else if(KARAR.stadAdi){ const a=KARAR.stadAdi.toLocaleUpperCase('tr-TR'); let fs=110; x.font=`900 ${fs}px system-ui`; while(x.measureText(a).width>940&&fs>40){fs-=4; x.font=`900 ${fs}px system-ui`;}
         ort(a,150,`900 ${fs}px system-ui`,'#ffffff'); ort('SIRADAKİ KARAR',262,'800 44px system-ui',ALT); ort(KARAR.takimAdi?KARAR.takimAdi.toLocaleUpperCase('tr-TR'):'TAKIMIN ADI ???',330,'900 50px system-ui',KREM); }
       else { ort('STADYUMUN ADI',118,'900 64px system-ui',KREM); ort('? ? ?',222,'900 120px system-ui',ALT); ort('YORUMLARA YAZ · EN ÇOK BEĞENİ KAZANIR',330,'800 38px system-ui',KREM); } }
@@ -1395,7 +1420,7 @@ function girisGoster(){ if(url.get('giris')==='0'||PLAT.kod!=='instagram') retur
 modBtn('ipucu').innerHTML=MOBIL?'<b>1 parmak</b> döndür · <b>2 parmak</b> yakınlaş/kaydır · <b>▲▼</b> yukarı-aşağı · <b>çift dokun</b> oraya uç':'<b>Sürükle</b> döndür · <b>Tekerlek</b> imlece yakınlaş · <b>WASD</b> gez · <b>Q/E</b> dön · <b>Boşluk/C</b> yukarı-aşağı · <b>Sağ tık</b> kaydır · <b>Çift tık</b> oraya uç';
 setTimeout(()=>modBtn('ipucu').classList.add('kapali'),MOBIL?7000:12000);
 function adim(t){
-  kisilerAdim(t); ARAC.adim(t); taraftarLOD(); EKRAN.adim(t); SULAMA.adim(t);
+  kisilerAdim(t); ARAC.adim(t); MASKOT.adim(t); taraftarLOD(); EKRAN.adim(t); SULAMA.adim(t);
   isikSovuAdim(t); girisYuruyus(t); tusHareket(t);
   if(ucusVeri){const k=Math.min(1,(t-ucusVeri.t0)/ucusVeri.dur), e=k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;
     ctl.target.lerpVectors(ucusVeri.ft,ucusVeri.tt,e); cam.position.lerpVectors(ucusVeri.fc,ucusVeri.tc,e); cam.position.y+=Math.sin(Math.PI*e)*(ucusVeri.kavis||0); cam.lookAt(ctl.target); ctl.enabled=false; if(k>=1){ucusVeri=null; ctl.enabled=true; ctl.update();}}
@@ -1416,13 +1441,13 @@ function adim(t){
     if(f<26){ if(++dusuk>=3){ if(BLOOM){BLOOM=false;} else if(PR>1){PR=1; renderer.setPixelRatio(1); boyut();} dusuk=0; } } else dusuk=0;}
 }
 renderer.setAnimationLoop(adim);
-ARMA.yukle(KARAR.arma||null); if(Array.isArray(KARAR.ilk11)){ ILK11.ciz(KARAR.ilk11); ILK11.goster(true); }
+ARMA.yukle(KARAR.arma||null); MASKOT.goster(!!KARAR.maskot); if(Array.isArray(KARAR.ilk11)){ ILK11.ciz(KARAR.ilk11); ILK11.goster(true); }
 window.__yon=()=>{const v=new THREE.Vector3(); cam.getWorldDirection(v); return v.toArray();};
 window.__test={kam:()=>({c:cam.position.toArray().map(v=>+v.toFixed(1)),t:ctl.target.toArray().map(v=>+v.toFixed(1))}),dur:()=>renderer.setAnimationLoop(null),adim,uzak:()=>{cam.position.sub(ctl.target).setLength(ctl.maxDistance).add(ctl.target);},yakin:()=>{ctl.target.set(0,8,45); cam.position.set(60,95,170); ctl.update();},sec:(q)=>{document.getElementById('q').value=q; document.getElementById('git').click();},hizli:()=>{if(ucusVeri) ucusVeri.dur=1;},secK:(i,uc=true)=>sec(i,uc),
   takimAdi:a=>{a=a||null; if(KARAR.takimAdi===a) return; KARAR.takimAdi=a; const n=window.__ekranS; window.__ekranS=-1; __test.ekranSahne(n===undefined?null:n); },
   armaGoster:v=>{window.__armaGizli=!v; ARMA.m.visible=v&&armaHazir; const n=window.__ekranS; window.__ekranS=-1; __test.ekranSahne(n===undefined?null:n);},
   ilk11:a=>{ if(a===null) ILK11.goster(false); else { ILK11.ciz(a); ILK11.goster(true); } }, aracP:()=>[ARAC.amb.position.toArray(),ARAC.itf.position.toArray()],
-  aracGoster:v=>{ARAC.amb.visible=ARAC.itf.visible=v;},
+  aracGoster:v=>{ARAC.amb.visible=ARAC.itf.visible=v;}, maskotGoster:v=>MASKOT.goster(v), maskotP:()=>MASKOT.g.position.toArray(),
   carpDolu:(x,y,z)=>CARP.dolu(new THREE.Vector3(x,y,z)), carpZemin:(x,z)=>CARP.zemin(x,z),
   koltukKonum:i=>koltuklar[sira[i]].p.toArray(),
   hedef:h=>{KARAR.hedef=h; const n=window.__ekranS; window.__ekranS=-1; __test.ekranSahne(n===undefined?null:n);},
