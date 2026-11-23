@@ -177,7 +177,7 @@ const PLAT=(()=>{ const pq=new URLSearchParams(location.search).get('plat'); con
   return {kod:'instagram',ad:'Instagram',adDa:"Instagram'da",FIIL:'TAKİP ET',Fiil:'Takip et',cta:"@besincitribun'u takip et",eden:'hesabını takip eden',sira:'takip',link:'https://www.instagram.com/besincitribun/',veri:'takipciler.json',ek:''}; })();
 // Taraftarlar: takipciler.json {guncelleme, isimler[]} (takip sırasına göre). ?demo=1 → deneme adları.
 let VERI={guncelleme:null,isimler:[]};
-const SURUM=32;
+const SURUM=33;
 try{const r=await fetch('surum.json?t='+Date.now(),{cache:'no-store'}); if(r.ok){const v=(await r.json()).surum; if(v>SURUM && url.get('v')!==String(v)){const u=new URL(location.href); u.searchParams.set('v',v); location.replace(u.toString());}}}catch(e){}
 try{const r=await fetch(PLAT.veri+'?t='+Date.now(),{cache:'no-store'}); if(r.ok) VERI=await r.json();}catch(e){}
 if(url.get('n_gercek')) VERI.isimler=VERI.isimler.slice(0,+url.get('n_gercek')); // video: belirli bir andaki tribün
@@ -868,12 +868,54 @@ const MASKOT=(()=>{ const g=new THREE.Group(), isik=[];
     parla(o,0.3,0.06,0.3,0,-1.62,0,'#bff4ff'); return o; };
   const solK=kol(-1), sagK=kol(1); solK.rotation.z=-0.12;
   g.scale.setScalar(1.15); g.position.set(-10,0,PW/2+1.6); g.rotation.y=Math.PI; g.visible=false; scene.add(g);
+  // ejderha (YouTube 7. karar): kırmızı gövde, altın karın, kanatlar, kuyruk, boynuzlar; sağ kolla el sallar
+  const e=new THREE.Group(), eIsik=[]; { const kz2=M('#c3141e'), kr2=M('#8e0d15'), al2=M('#f2b632'), bz=M('#f4f1ea');
+    for(const sx of [-0.5,0.5]){ kutu(e,0.62,1.1,0.7,sx,0.55,0,kz2); kutu(e,0.7,0.22,0.9,sx,0.11,0.1,kr2); }
+    kutu(e,1.6,1.9,1.1,0,2.0,0,kz2); kutu(e,1.0,1.5,0.08,0,1.95,0.56,al2);
+    for(let i=0;i<3;i++) kutu(e,1.02,0.07,0.1,0,1.5+i*0.45,0.6,M('#d9961e'));
+    const ek=new THREE.Group(); ek.position.set(0,3.2,0.05); e.add(ek);
+    kutu(ek,1.15,0.95,1.0,0,0.35,0,kz2); kutu(ek,0.8,0.5,0.7,0,0.15,0.7,kz2); kutu(ek,0.7,0.12,0.6,0,-0.05,0.75,al2);
+    for(const sx of [-0.3,0.3]){ kutu(ek,0.14,0.5,0.14,sx,1.0,-0.2,bz).rotation.x=-0.5; const m=new THREE.MeshBasicMaterial({color:'#ffe066',toneMapped:false}); kutu(ek,0.2,0.12,0.04,sx,0.55,0.51,m); eIsik.push(m); }
+    for(let i=0;i<4;i++) kutu(ek,0.12,0.22,0.22,0,0.85-i*0.25,-0.55,al2);
+    for(const sx of [-1,1]){ const k2=new THREE.Group(); k2.position.set(sx*0.6,2.7,-0.55); e.add(k2); const w=kutu(k2,0.08,1.6,1.9,sx*0.9,0.4,-0.4,kr2); w.rotation.z=sx*0.5; kutu(k2,0.1,0.12,2.0,sx*0.6,1.15,-0.4,kz2).rotation.z=sx*0.5; eIsik.push(null); e.userData['kanat'+sx]=k2; }
+    let kx=0,ky=0.6,kz3=-0.6; for(let i=0;i<5;i++){ const s=0.6-i*0.09; kutu(e,s,s,0.7,kx,ky,kz3,kz2); kz3-=0.55; ky+=i<3?-0.05:0.18; } kutu(e,0.4,0.4,0.15,kx,ky+0.25,kz3+0.1,al2);
+    const ekol=(sx)=>{ const o=new THREE.Group(); o.position.set(sx*1.0,2.65,0); e.add(o); kutu(o,0.45,1.2,0.5,0,-0.55,0,kz2); kutu(o,0.5,0.3,0.55,0,-1.25,0.05,al2); return o; };
+    const eSol=ekol(-1), eSag=ekol(1); eSol.rotation.z=-0.15; e.userData.sag=eSag; e.userData.kafa=ek; }
+  e.scale.setScalar(1.1); e.position.copy(g.position); e.rotation.y=Math.PI; e.visible=false; scene.add(e);
+  let tur='demir';
   const sonuk=new THREE.Color('#5fa8bd'), acik=new THREE.Color('#e6fcff');
-  function adim(t){ if(!g.visible) return; const s=t/1000;
+  function adim(t){ const s=t/1000;
+    if(e.visible){ const u=e.userData; u.sag.rotation.z=2.5+0.45*Math.sin(s*5.2); u.kafa.rotation.y=0.3*Math.sin(s*0.9); e.position.y=Math.abs(Math.sin(s*2.6))*0.08;
+      u['kanat-1'].rotation.y=0.35+0.25*Math.sin(s*3); u['kanat1'].rotation.y=-0.35-0.25*Math.sin(s*3); const n=0.5+0.5*Math.sin(s*3); for(const m of eIsik) if(m) m.color.setHSL(0.13,1,0.5+0.25*n); }
+    if(!g.visible) return;
     sagK.rotation.z=2.5+0.45*Math.sin(s*5.2); sagK.rotation.x=0.12*Math.sin(s*2.6);
     kafa.rotation.y=0.35*Math.sin(s*0.9); g.position.y=Math.abs(Math.sin(s*2.6))*0.08;
     const n=0.5+0.5*Math.sin(s*3); for(const m of isik) m.color.copy(sonuk).lerp(acik,n); gogus.color.copy(acik).lerp(sonuk,1-n*0.6); }
-  return {g,adim,goster:v=>{g.visible=!!v;}};
+  return {g,e,adim,goster:v=>{ if(typeof v==='string') tur=v; g.visible=!!v&&tur!=='ejderha'; e.visible=!!v&&tur==='ejderha'; }};
+})();
+
+/* ================== HOCA: teknik direktör kenar çizgisinde (eşofman, katlanır sandalye, adı üstünde) ================== */
+const HOCA=(()=>{ const g=new THREE.Group();
+  const kutu=(p,w,h,d,x,y,z,m)=>{ const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m); o.position.set(x,y,z); p.add(o); return o; };
+  const es=M('#16181d'), ser=M('#b3121c'), ten=M('#d9a27a'), sac=M('#2a1d14');
+  for(const sx of [-0.13,0.13]){ kutu(g,0.18,0.86,0.2,sx,0.43,0,es); kutu(g,0.04,0.86,0.21,sx+(sx>0?0.08:-0.08),0.43,0,ser); kutu(g,0.2,0.1,0.3,sx,0.05,0.05,M('#f4f1ea')); }
+  kutu(g,0.5,0.62,0.28,0,1.17,0,es); kutu(g,0.06,0.62,0.29,0,1.17,0,ser); kutu(g,0.52,0.08,0.3,0,1.5,0,ser);
+  const kafa=new THREE.Group(); kafa.position.set(0,1.72,0); g.add(kafa); kutu(kafa,0.27,0.3,0.27,0,0,0,ten); kutu(kafa,0.29,0.09,0.29,0,0.17,-0.01,sac); kutu(kafa,0.29,0.16,0.07,0,0.08,-0.13,sac);
+  const kol=(sx)=>{ const o=new THREE.Group(); o.position.set(sx*0.31,1.45,0); g.add(o); kutu(o,0.13,0.55,0.14,0,-0.27,0,es); kutu(o,0.11,0.12,0.12,0,-0.6,0,ten); return o; };
+  const sol=kol(-1), sag=kol(1);
+  // katlanır sandalye (arkasında)
+  const sd=M('#2a2d33'), kum=M('#b3121c'); kutu(g,0.55,0.06,0.5,0.9,0.5,-0.4,kum); kutu(g,0.55,0.5,0.06,0.9,0.85,-0.65,kum);
+  for(const [x,z] of [[0.65,-0.2],[1.15,-0.2],[0.65,-0.62],[1.15,-0.62]]) kutu(g,0.04,0.5,0.04,x,0.25,z,sd);
+  // ad etiketi
+  const c=document.createElement('canvas'); c.width=512; c.height=112; const tx=new THREE.CanvasTexture(c); tx.colorSpace=THREE.SRGBColorSpace;
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,depthWrite:false,toneMapped:false})); sp.scale.set(4.4,0.96,1); sp.position.set(0,2.75,0); g.add(sp);
+  function ciz(ad){ const x=c.getContext('2d'); x.clearRect(0,0,512,112); x.fillStyle='rgba(14,15,18,0.9)'; x.beginPath(); x.roundRect(4,6,504,100,24); x.fill(); x.strokeStyle='#f2c14e'; x.lineWidth=6; x.stroke();
+    x.textBaseline='middle'; x.fillStyle='#f2c14e'; x.font='900 34px system-ui'; x.fillText('HOCA',24,56); let fs=40, t='@'+ad; x.font=`800 ${fs}px system-ui`; while(x.measureText(t).width>360&&fs>20){fs-=2; x.font=`800 ${fs}px system-ui`;} x.fillStyle='#ffffff'; x.fillText(t,130,58); tx.needsUpdate=true; }
+  g.position.set(-24,0,PW/2+1.6); g.rotation.y=Math.PI; g.visible=false; scene.add(g);
+  function adim(t){ if(!g.visible) return; const s=t/1000; const f=(s%6)/6;
+    sag.rotation.x=f<0.5?-1.3-0.2*Math.sin(s*7):-0.2*Math.sin(s*1.3); sag.rotation.z=f<0.5?0.15:0; sol.rotation.x=-0.25; sol.rotation.z=-0.2;
+    kafa.rotation.y=0.5*Math.sin(s*0.7); }
+  return {g,adim,goster:(ad)=>{ g.visible=!!ad; if(ad) ciz(ad); }};
 })();
 
 /* ================== ÇİM SULAMA: 8 dönen fıskiye, kavisli su jetleri, ıslanan çim ==================
@@ -1420,7 +1462,7 @@ function girisGoster(){ if(url.get('giris')==='0'||PLAT.kod!=='instagram') retur
 modBtn('ipucu').innerHTML=MOBIL?'<b>1 parmak</b> döndür · <b>2 parmak</b> yakınlaş/kaydır · <b>▲▼</b> yukarı-aşağı · <b>çift dokun</b> oraya uç':'<b>Sürükle</b> döndür · <b>Tekerlek</b> imlece yakınlaş · <b>WASD</b> gez · <b>Q/E</b> dön · <b>Boşluk/C</b> yukarı-aşağı · <b>Sağ tık</b> kaydır · <b>Çift tık</b> oraya uç';
 setTimeout(()=>modBtn('ipucu').classList.add('kapali'),MOBIL?7000:12000);
 function adim(t){
-  kisilerAdim(t); ARAC.adim(t); MASKOT.adim(t); taraftarLOD(); EKRAN.adim(t); SULAMA.adim(t);
+  kisilerAdim(t); ARAC.adim(t); MASKOT.adim(t); HOCA.adim(t); taraftarLOD(); EKRAN.adim(t); SULAMA.adim(t);
   isikSovuAdim(t); girisYuruyus(t); tusHareket(t);
   if(ucusVeri){const k=Math.min(1,(t-ucusVeri.t0)/ucusVeri.dur), e=k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;
     ctl.target.lerpVectors(ucusVeri.ft,ucusVeri.tt,e); cam.position.lerpVectors(ucusVeri.fc,ucusVeri.tc,e); cam.position.y+=Math.sin(Math.PI*e)*(ucusVeri.kavis||0); cam.lookAt(ctl.target); ctl.enabled=false; if(k>=1){ucusVeri=null; ctl.enabled=true; ctl.update();}}
@@ -1441,13 +1483,13 @@ function adim(t){
     if(f<26){ if(++dusuk>=3){ if(BLOOM){BLOOM=false;} else if(PR>1){PR=1; renderer.setPixelRatio(1); boyut();} dusuk=0; } } else dusuk=0;}
 }
 renderer.setAnimationLoop(adim);
-ARMA.yukle(KARAR.arma||null); MASKOT.goster(!!KARAR.maskot); if(Array.isArray(KARAR.ilk11)){ ILK11.ciz(KARAR.ilk11); ILK11.goster(true); }
+ARMA.yukle(KARAR.arma||null); MASKOT.goster(KARAR.maskot||false); HOCA.goster(KARAR.hoca||null); if(Array.isArray(KARAR.ilk11)){ ILK11.ciz(KARAR.ilk11); ILK11.goster(true); }
 window.__yon=()=>{const v=new THREE.Vector3(); cam.getWorldDirection(v); return v.toArray();};
 window.__test={kam:()=>({c:cam.position.toArray().map(v=>+v.toFixed(1)),t:ctl.target.toArray().map(v=>+v.toFixed(1))}),dur:()=>renderer.setAnimationLoop(null),adim,uzak:()=>{cam.position.sub(ctl.target).setLength(ctl.maxDistance).add(ctl.target);},yakin:()=>{ctl.target.set(0,8,45); cam.position.set(60,95,170); ctl.update();},sec:(q)=>{document.getElementById('q').value=q; document.getElementById('git').click();},hizli:()=>{if(ucusVeri) ucusVeri.dur=1;},secK:(i,uc=true)=>sec(i,uc),
   takimAdi:a=>{a=a||null; if(KARAR.takimAdi===a) return; KARAR.takimAdi=a; const n=window.__ekranS; window.__ekranS=-1; __test.ekranSahne(n===undefined?null:n); },
   armaGoster:v=>{window.__armaGizli=!v; ARMA.m.visible=v&&armaHazir; const n=window.__ekranS; window.__ekranS=-1; __test.ekranSahne(n===undefined?null:n);},
   ilk11:a=>{ if(a===null) ILK11.goster(false); else { ILK11.ciz(a); ILK11.goster(true); } }, aracP:()=>[ARAC.amb.position.toArray(),ARAC.itf.position.toArray()],
-  aracGoster:v=>{ARAC.amb.visible=ARAC.itf.visible=v;}, maskotGoster:v=>MASKOT.goster(v), maskotP:()=>MASKOT.g.position.toArray(),
+  aracGoster:v=>{ARAC.amb.visible=ARAC.itf.visible=v;}, maskotGoster:v=>MASKOT.goster(v), hocaGoster:a=>HOCA.goster(a), maskotP:()=>MASKOT.g.position.toArray(),
   carpDolu:(x,y,z)=>CARP.dolu(new THREE.Vector3(x,y,z)), carpZemin:(x,z)=>CARP.zemin(x,z),
   koltukKonum:i=>koltuklar[sira[i]].p.toArray(),
   hedef:h=>{KARAR.hedef=h; const n=window.__ekranS; window.__ekranS=-1; __test.ekranSahne(n===undefined?null:n);},
